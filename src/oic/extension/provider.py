@@ -2,6 +2,7 @@ import json
 import logging
 import socket
 from functools import cmp_to_key
+from typing import Dict  # noqa
 from urllib.parse import parse_qs
 from urllib.parse import splitquery  # type: ignore
 
@@ -183,10 +184,13 @@ class Provider(provider.Provider):
             self.capabilities = self.provider_features()
         self.baseurl = baseurl or name
         self.hostname = hostname or socket.gethostname()
-        self.kid = {"sig": {}, "enc": {}}
+        self.kid = {"sig": {}, "enc": {}}  # type: Dict[str, Dict[str, str]]
         self.config = config or {}
         self.behavior = behavior or {}
-        self.token_policy = {"access_token": {}, "refresh_token": {}}
+        self.token_policy = {
+            "access_token": {},
+            "refresh_token": {},
+        }  # type: Dict[str, Dict[str, str]]
         if lifetime_policy is None:
             self.lifetime_policy = {
                 "access_token": {
@@ -247,11 +251,13 @@ class Provider(provider.Provider):
             msg = "Failed to load client keys: {}"
             logger.error(msg.format(sanitize(request.to_dict())))
             logger.error("%s", err)
-            err = ClientRegistrationError(
+            error = ClientRegistrationError(
                 error="invalid_configuration_parameter", error_description="%s" % err
             )
             return Response(
-                err.to_json(), content="application/json", status_code="400 Bad Request"
+                error.to_json(),
+                content="application/json",
+                status_code="400 Bad Request",
             )
 
         # Add the client_secret as a symmetric key to the keyjar
@@ -465,7 +471,7 @@ class Provider(provider.Provider):
             except (AuthnFailure, UnknownAssertionType):
                 return Unauthorized()
 
-        client_restrictions = {}
+        client_restrictions = {}  # type: ignore
         if "parsed_software_statement" in _request:
             for ss in _request["parsed_software_statement"]:
                 client_restrictions.update(self.consume_software_statement(ss))
@@ -781,11 +787,11 @@ class Provider(provider.Provider):
             client_id = self.client_authn(self, req, authn)
         except FailedAuthentication as err:
             logger.error(err)
-            err = TokenErrorResponse(
+            error = TokenErrorResponse(
                 error="unauthorized_client", error_description="%s" % err
             )
             return Response(
-                err.to_json(), content="application/json", status="401 Unauthorized"
+                error.to_json(), content="application/json", status="401 Unauthorized"
             )
 
         logger.debug("{}: {} requesting {}".format(endpoint, client_id, req.to_dict()))
