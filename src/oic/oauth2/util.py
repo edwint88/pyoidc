@@ -1,6 +1,6 @@
 import logging
+from http import cookiejar as http_cookiejar
 from http.cookiejar import http2time  # type: ignore
-from http.cookies import SimpleCookie
 from typing import Any  # noqa
 from typing import Dict  # noqa
 from urllib.parse import parse_qs
@@ -164,7 +164,7 @@ def set_cookie(cookiejar, kaka):
                 except (TypeError, AttributeError):
                     pass
 
-            new_cookie = SimpleCookie(**std_attr)
+            new_cookie = http_cookiejar.Cookie(**std_attr)  # type: ignore
 
             cookiejar.set_cookie(new_cookie)
 
