@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     gnupg \
     ntp \
+    python-minimal \
     wget
 RUN wget -q https://deb.nodesource.com/node_8.x/pool/main/n/nodejs/nodejs_8.15.1-1nodesource1_amd64.deb -O node.deb
 RUN dpkg -i node.deb
