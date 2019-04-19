@@ -2,18 +2,21 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends\
-    git \
-    ntp \
-    gnupg \
     apache2 \
-    wget \
     ca-certificates \
+    git \
+    gnupg \
     libgconf-2-4 \
-    libnss3-tools
-RUN wget -q -O - https://deb.nodesource.com/setup_8.x | bash -
+    libnss3-tools \
+    ntp \
+    python-minimal \
+    wget
+RUN wget -q https://deb.nodesource.com/node_8.x/pool/main/n/nodejs/nodejs_8.15.1-1nodesource1_amd64.deb -O node.deb
+RUN dpkg -i node.deb
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 RUN echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list
-RUN apt-get update && apt-get install -y --no-install-recommends nodejs google-chrome-stable && apt-get clean \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    google-chrome-stable && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root
